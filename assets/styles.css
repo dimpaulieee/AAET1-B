@@ -341,3 +341,46 @@ a:hover {
     width: 80%;
   }
 }
+
+/* ================= Login Form ================= */
+.login-form {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.login-form input {
+  padding: 12px 20px;
+  margin: 8px 0;
+  width: 250px;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
+}
+
+.login-form button {
+  padding: 12px 30px;
+  margin-top: 15px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 12px;
+  border: none;
+  background: #ff7f50;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-form button:hover {
+  transform: translateY(-2px);
+  background: #ff6347;
+}
+
+.login-msg {
+  margin-top: 10px;
+  color: yellow;
+  font-weight: bold;
+}
+
+/* Keep previous intro-bg, visuals, fadeIn, animations, responsive as before */
