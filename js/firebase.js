@@ -4,7 +4,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 
-// Your web app's Firebase configuration
+// Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyCYTtxWajWspPqkdPggdNHestJ8AYPHto4",
   authDomain: "test-2194f.firebaseapp.com",
@@ -15,9 +15,7 @@ const firebaseConfig = {
   measurementId: "G-ZXDT8R6Q9C"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);      // ← Export auth
-export const db = getFirestore(app);   // ← Export Firestore
+export const auth = getAuth(app);
+export const db = getFirestore(app);
 export const analytics = getAnalytics(app);
-
