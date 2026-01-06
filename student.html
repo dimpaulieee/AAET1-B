@@ -14,9 +14,9 @@
   <!-- Header -->
   <header class="header-card">
     <h1><i class="fas fa-graduation-cap"></i> Welcome to AAET 1-B</h1>
-    <p id="sectionMotto" class="motto"></p>
-    <div class="welcome-text">
-      <p><i class="fas fa-user"></i> Logged in as: <span id="userEmail">Student</span></p>
+    <p id="sectionMotto" class="motto" style="color: white !important;"></p>
+    <div class="welcome-text" style="color: white !important;">
+      <p><i class="fas fa-user"></i> Logged in as: <span id="userEmail" style="color: white !important;">Student</span></p>
     </div>
     <button id="logoutBtn" class="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </header>
@@ -37,7 +37,7 @@
           <div class="reviewer-content">
             <h3 id="reviewerName">Loading...</h3>
             <p id="reviewerSubject"></p>
-            <a id="reviewerLink" href="#" target="_blank" class="resource-link">
+            <a id="reviewerLink" href="#" target="_blank" class="resource-link" style="display: none;">
               <i class="fas fa-external-link-alt"></i> Open Resource
             </a>
           </div>
@@ -93,15 +93,15 @@ onAuthStateChanged(auth, (user) => {
 
 /* ===== Section Motto ===== */
 async function loadMotto() {
-  const docRef = doc(db, 'sectionInfo', 'AAET1B');
-  const snap = await getDoc(docRef);
-  const motto = snap.exists() ? `"${snap.data().motto}"` : 'No motto set yet';
-  document.getElementById('sectionMotto').innerText = motto;
-  
-  // Add typing animation for motto
-  const mottoElement = document.getElementById('sectionMotto');
-  mottoElement.style.opacity = '0';
-  mottoElement.style.animation = 'fadeIn 1.5s ease forwards';
+  try {
+    const docRef = doc(db, 'sectionInfo', 'AAET1B');
+    const snap = await getDoc(docRef);
+    const motto = snap.exists() ? `"${snap.data().motto || 'Excellence, Unity, and Growth'}"` : '"Excellence, Unity, and Growth"';
+    document.getElementById('sectionMotto').innerText = motto;
+  } catch (error) {
+    console.error('Error loading motto:', error);
+    document.getElementById('sectionMotto').innerText = '"Excellence, Unity, and Growth"';
+  }
 }
 
 /* ===== Pictures Carousel ===== */
@@ -109,27 +109,49 @@ let currentImageIndex = 0;
 let images = [];
 
 async function loadPictures() {
-  const carousel = document.getElementById('picturesCarousel');
-  images = [];
-  
-  const q = query(collection(db, 'pictures'), orderBy('createdAt', 'desc'));
-  const snapshot = await getDocs(q);
-  
-  snapshot.forEach(docSnap => {
-    const picture = docSnap.data();
-    images.push(picture);
-  });
-  
-  updateCarousel();
-  
-  // Set up real-time updates
-  onSnapshot(q, (snapshot) => {
+  try {
+    const carousel = document.getElementById('picturesCarousel');
     images = [];
+    
+    const q = query(collection(db, 'pictures'), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    
     snapshot.forEach(docSnap => {
-      images.push(docSnap.data());
+      const picture = docSnap.data();
+      if (picture.url) {
+        images.push({
+          url: picture.url,
+          description: picture.description || 'Section picture'
+        });
+      }
     });
+    
     updateCarousel();
-  });
+    
+    if (images.length > 0) {
+      startCarousel();
+    }
+    
+    // Set up real-time updates
+    onSnapshot(q, (snapshot) => {
+      images = [];
+      snapshot.forEach(docSnap => {
+        const picture = docSnap.data();
+        if (picture.url) {
+          images.push({
+            url: picture.url,
+            description: picture.description || 'Section picture'
+          });
+        }
+      });
+      updateCarousel();
+    });
+    
+  } catch (error) {
+    console.error('Error loading pictures:', error);
+    document.getElementById('picturesCarousel').innerHTML = 
+      '<p class="no-content" style="color: #333; padding: 20px; text-align: center;">Unable to load pictures</p>';
+  }
 }
 
 function updateCarousel() {
@@ -137,22 +159,48 @@ function updateCarousel() {
   carousel.innerHTML = '';
   
   if (images.length === 0) {
-    carousel.innerHTML = '<p class="no-content">No pictures available yet.</p>';
+    carousel.innerHTML = '<p class="no-content" style="color: #333; padding: 20px; text-align: center;">No pictures available yet.</p>';
     return;
   }
   
-  const img = document.createElement('img');
-  img.src = images[currentImageIndex].url;
-  img.alt = images[currentImageIndex].description || 'Section picture';
-  img.classList.add('carousel-img');
-  img.style.animation = 'fadeIn 0.5s ease';
-  carousel.appendChild(img);
+  const currentImage = images[currentImageIndex];
   
-  // Add caption
+  const imgContainer = document.createElement('div');
+  imgContainer.style.position = 'relative';
+  imgContainer.style.width = '100%';
+  imgContainer.style.height = '100%';
+  
+  const img = document.createElement('img');
+  img.src = currentImage.url;
+  img.alt = currentImage.description;
+  img.classList.add('carousel-img');
+  img.style.width = '100%';
+  img.style.height = '100%';
+  img.style.objectFit = 'cover';
+  img.style.borderRadius = '10px';
+  img.style.opacity = '1';
+  
+  // Add error handling for images
+  img.onerror = function() {
+    this.src = 'https://via.placeholder.com/300x200?text=Image+Not+Found';
+  };
+  
   const caption = document.createElement('div');
   caption.className = 'carousel-caption';
-  caption.textContent = images[currentImageIndex].description || 'Section picture';
-  carousel.appendChild(caption);
+  caption.textContent = currentImage.description;
+  caption.style.position = 'absolute';
+  caption.style.bottom = '0';
+  caption.style.left = '0';
+  caption.style.right = '0';
+  caption.style.background = 'rgba(0, 0, 0, 0.7)';
+  caption.style.color = 'white';
+  caption.style.padding = '10px';
+  caption.style.textAlign = 'center';
+  caption.style.fontSize = '0.9rem';
+  
+  imgContainer.appendChild(img);
+  imgContainer.appendChild(caption);
+  carousel.appendChild(imgContainer);
 }
 
 document.getElementById('nextBtn').addEventListener('click', () => {
@@ -170,11 +218,12 @@ document.getElementById('prevBtn').addEventListener('click', () => {
 // Auto-rotate carousel
 let carouselInterval;
 function startCarousel() {
+  if (images.length <= 1) return;
+  
+  clearInterval(carouselInterval);
   carouselInterval = setInterval(() => {
-    if (images.length > 1) {
-      currentImageIndex = (currentImageIndex + 1) % images.length;
-      updateCarousel();
-    }
+    currentImageIndex = (currentImageIndex + 1) % images.length;
+    updateCarousel();
   }, 5000);
 }
 
@@ -187,86 +236,98 @@ document.getElementById('picturesCarousel').addEventListener('mouseleave', start
 
 /* ===== Officers ===== */
 async function loadOfficers() {
-  const officersList = document.getElementById('officersList');
-  
-  const q = query(collection(db, 'officers'), orderBy('position'));
-  const snapshot = await getDocs(q);
-  
-  if (snapshot.empty) {
-    officersList.innerHTML = '<p class="no-content">No officers assigned yet.</p>';
-    return;
+  try {
+    const officersList = document.getElementById('officersList');
+    
+    const q = query(collection(db, 'officers'), orderBy('position'));
+    const snapshot = await getDocs(q);
+    
+    if (snapshot.empty) {
+      officersList.innerHTML = '<p class="no-content" style="color: #333; text-align: center; padding: 20px;">No officers assigned yet.</p>';
+      return;
+    }
+    
+    officersList.innerHTML = '';
+    snapshot.forEach((docSnap, index) => {
+      const officer = docSnap.data();
+      const officerCard = document.createElement('div');
+      officerCard.className = 'officer-card';
+      officerCard.innerHTML = `
+        <div class="officer-icon">
+          <i class="fas fa-user-tie"></i>
+        </div>
+        <div class="officer-details">
+          <h4>${officer.position || ''}</h4>
+          <p>${officer.name || ''}</p>
+        </div>
+      `;
+      officerCard.style.animation = 'fadeInUp 0.5s ease';
+      officerCard.style.animationDelay = `${index * 0.1}s`;
+      officersList.appendChild(officerCard);
+    });
+    
+    // Set up real-time updates
+    onSnapshot(q, (snapshot) => {
+      loadOfficers();
+    });
+    
+  } catch (error) {
+    console.error('Error loading officers:', error);
+    document.getElementById('officersList').innerHTML = 
+      '<p class="no-content" style="color: #333; text-align: center; padding: 20px;">Error loading officers</p>';
   }
-  
-  officersList.innerHTML = '';
-  snapshot.forEach((docSnap, index) => {
-    const officer = docSnap.data();
-    const officerCard = document.createElement('div');
-    officerCard.className = 'officer-card';
-    officerCard.style.animationDelay = `${index * 0.1}s`;
-    officerCard.innerHTML = `
-      <div class="officer-icon">
-        <i class="fas fa-user-tie"></i>
-      </div>
-      <div class="officer-details">
-        <h4>${officer.position}</h4>
-        <p>${officer.name}</p>
-      </div>
-    `;
-    officerCard.style.animation = 'fadeInUp 0.5s ease forwards';
-    officerCard.style.opacity = '0';
-    officersList.appendChild(officerCard);
-  });
-  
-  // Set up real-time updates
-  onSnapshot(q, (snapshot) => {
-    loadOfficers();
-  });
 }
 
 /* ===== Announcements ===== */
 async function loadAnnouncements() {
-  const announcementsList = document.getElementById('announcementsList');
-  
-  const q = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'));
-  const snapshot = await getDocs(q);
-  
-  if (snapshot.empty) {
-    announcementsList.innerHTML = '<p class="no-content">No announcements yet.</p>';
-    return;
-  }
-  
-  announcementsList.innerHTML = '';
-  snapshot.forEach((docSnap, index) => {
-    const announcement = docSnap.data();
-    const date = new Date(announcement.createdAt).toLocaleDateString('en-US', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+  try {
+    const announcementsList = document.getElementById('announcementsList');
+    
+    const q = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    
+    if (snapshot.empty) {
+      announcementsList.innerHTML = '<p class="no-content" style="color: #333; text-align: center; padding: 20px;">No announcements yet.</p>';
+      return;
+    }
+    
+    announcementsList.innerHTML = '';
+    snapshot.forEach((docSnap, index) => {
+      const announcement = docSnap.data();
+      const date = new Date(announcement.createdAt).toLocaleDateString('en-US', {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+      
+      const announcementCard = document.createElement('div');
+      announcementCard.className = 'announcement-card';
+      announcementCard.innerHTML = `
+        <div class="announcement-header">
+          <h4>${announcement.title || ''}</h4>
+          <span class="announcement-time">${date}</span>
+        </div>
+        <p>${announcement.content || ''}</p>
+        <div class="announcement-footer">
+          <small><i class="fas fa-user"></i> ${announcement.createdBy || 'Admin'}</small>
+        </div>
+      `;
+      announcementCard.style.animation = 'slideInRight 0.5s ease';
+      announcementCard.style.animationDelay = `${index * 0.1}s`;
+      announcementsList.appendChild(announcementCard);
     });
     
-    const announcementCard = document.createElement('div');
-    announcementCard.className = 'announcement-card';
-    announcementCard.style.animationDelay = `${index * 0.1}s`;
-    announcementCard.innerHTML = `
-      <div class="announcement-header">
-        <h4>${announcement.title}</h4>
-        <span class="announcement-time">${date}</span>
-      </div>
-      <p>${announcement.content}</p>
-      <div class="announcement-footer">
-        <small><i class="fas fa-user"></i> ${announcement.createdBy || 'Admin'}</small>
-      </div>
-    `;
-    announcementCard.style.animation = 'slideInRight 0.5s ease forwards';
-    announcementCard.style.opacity = '0';
-    announcementsList.appendChild(announcementCard);
-  });
-  
-  // Set up real-time updates
-  onSnapshot(q, (snapshot) => {
-    loadAnnouncements();
-  });
+    // Set up real-time updates
+    onSnapshot(q, (snapshot) => {
+      loadAnnouncements();
+    });
+    
+  } catch (error) {
+    console.error('Error loading announcements:', error);
+    document.getElementById('announcementsList').innerHTML = 
+      '<p class="no-content" style="color: #333; text-align: center; padding: 20px;">Error loading announcements</p>';
+  }
 }
 
 /* ===== Reviewers ===== */
@@ -274,37 +335,59 @@ let reviewers = [];
 let reviewerIndex = 0;
 
 async function loadReviewers() {
-  const q = query(collection(db, 'reviewers'), orderBy('featured', 'desc'), orderBy('createdAt', 'desc'));
-  const snapshot = await getDocs(q);
-  
-  reviewers = [];
-  snapshot.forEach(docSnap => {
-    reviewers.push({ id: docSnap.id, ...docSnap.data() });
-  });
-  
-  if (reviewers.length > 0) {
-    showReviewer();
-  } else {
-    document.getElementById('reviewerName').textContent = 'No reviewers available';
-    document.getElementById('reviewerSubject').textContent = '';
-    document.getElementById('reviewerLink').style.display = 'none';
-  }
-  
-  // Set up real-time updates
-  onSnapshot(q, (snapshot) => {
+  try {
+    const q = query(collection(db, 'reviewers'), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    
     reviewers = [];
     snapshot.forEach(docSnap => {
-      reviewers.push({ id: docSnap.id, ...docSnap.data() });
+      const data = docSnap.data();
+      reviewers.push({ 
+        id: docSnap.id, 
+        name: data.name || '',
+        subject: data.subject || '',
+        link: data.link || '',
+        featured: data.featured || false
+      });
     });
     
     if (reviewers.length > 0) {
-      // Keep current index if possible
-      if (reviewerIndex >= reviewers.length) {
-        reviewerIndex = 0;
-      }
       showReviewer();
+      startReviewerCycle();
+    } else {
+      document.getElementById('reviewerName').textContent = 'No reviewers available';
+      document.getElementById('reviewerSubject').textContent = 'Check back later for reviewer materials';
+      document.getElementById('reviewerLink').style.display = 'none';
     }
-  });
+    
+    // Set up real-time updates
+    onSnapshot(q, (snapshot) => {
+      reviewers = [];
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        reviewers.push({ 
+          id: docSnap.id, 
+          name: data.name || '',
+          subject: data.subject || '',
+          link: data.link || '',
+          featured: data.featured || false
+        });
+      });
+      
+      if (reviewers.length > 0) {
+        if (reviewerIndex >= reviewers.length) {
+          reviewerIndex = 0;
+        }
+        showReviewer();
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error loading reviewers:', error);
+    document.getElementById('reviewerName').textContent = 'Error loading reviewers';
+    document.getElementById('reviewerSubject').textContent = '';
+    document.getElementById('reviewerLink').style.display = 'none';
+  }
 }
 
 function showReviewer() {
@@ -315,33 +398,27 @@ function showReviewer() {
   const reviewerSubject = document.getElementById('reviewerSubject');
   const reviewerLink = document.getElementById('reviewerLink');
   
-  // Add animation
-  reviewerName.style.animation = 'slideInLeft 0.5s ease';
-  reviewerSubject.style.animation = 'slideInLeft 0.5s ease';
+  reviewerName.innerHTML = reviewer.name;
+  reviewerSubject.textContent = reviewer.subject;
   
-  setTimeout(() => {
-    reviewerName.textContent = reviewer.name;
-    reviewerSubject.textContent = reviewer.subject;
-    
-    if (reviewer.link) {
-      reviewerLink.href = reviewer.link;
-      reviewerLink.style.display = 'inline-block';
-      reviewerLink.textContent = 'Open Resource';
-    } else {
-      reviewerLink.style.display = 'none';
+  if (reviewer.link && reviewer.link.trim() !== '') {
+    // Ensure the link has proper protocol
+    let link = reviewer.link.trim();
+    if (!link.startsWith('http://') && !link.startsWith('https://')) {
+      link = 'https://' + link;
     }
     
-    // Add featured badge if needed
-    if (reviewer.featured) {
-      reviewerName.innerHTML = `${reviewer.name} <span class="featured-badge">🌟 Featured</span>`;
-    }
-    
-    // Reset animation
-    setTimeout(() => {
-      reviewerName.style.animation = '';
-      reviewerSubject.style.animation = '';
-    }, 500);
-  }, 200);
+    reviewerLink.href = link;
+    reviewerLink.style.display = 'inline-block';
+    reviewerLink.textContent = 'Open Resource';
+    reviewerLink.target = '_blank';
+  } else {
+    reviewerLink.style.display = 'none';
+  }
+  
+  if (reviewer.featured) {
+    reviewerName.innerHTML = `${reviewer.name} <span class="featured-badge">🌟 Featured</span>`;
+  }
 }
 
 document.getElementById('nextReviewerBtn').addEventListener('click', () => {
@@ -359,52 +436,68 @@ document.getElementById('prevReviewerBtn').addEventListener('click', () => {
 // Auto-cycle reviewers every 10 seconds
 let reviewerInterval;
 function startReviewerCycle() {
+  if (reviewers.length <= 1) return;
+  
+  clearInterval(reviewerInterval);
   reviewerInterval = setInterval(() => {
-    if (reviewers.length > 1) {
-      reviewerIndex = (reviewerIndex + 1) % reviewers.length;
-      showReviewer();
-    }
+    reviewerIndex = (reviewerIndex + 1) % reviewers.length;
+    showReviewer();
   }, 10000);
 }
 
 /* ===== Initialize Everything ===== */
 async function init() {
-  loadMotto();
-  loadPictures();
-  loadOfficers();
-  loadAnnouncements();
-  loadReviewers();
-  
-  startCarousel();
-  startReviewerCycle();
-  
-  // Add floating particles effect
-  createFloatingElements();
-}
-
-function createFloatingElements() {
-  const floatingContainer = document.createElement('div');
-  floatingContainer.className = 'floating-elements';
-  document.body.appendChild(floatingContainer);
-  
-  const icons = ['📚', '🎓', '✏️', '📝', '🌟', '💡', '⚡', '🎯'];
-  
-  for (let i = 0; i < 15; i++) {
-    const element = document.createElement('div');
-    element.className = 'floating-element';
-    element.textContent = icons[Math.floor(Math.random() * icons.length)];
-    element.style.left = `${Math.random() * 100}%`;
-    element.style.top = `${Math.random() * 100}%`;
-    element.style.fontSize = `${Math.random() * 20 + 15}px`;
-    element.style.animation = `float ${Math.random() * 10 + 5}s ease-in-out infinite`;
-    element.style.animationDelay = `${Math.random() * 5}s`;
-    element.style.opacity = '0.1';
-    floatingContainer.appendChild(element);
+  try {
+    await Promise.all([
+      loadMotto(),
+      loadPictures(),
+      loadOfficers(),
+      loadAnnouncements(),
+      loadReviewers()
+    ]);
+    
+    console.log('Student dashboard loaded successfully');
+  } catch (error) {
+    console.error('Error initializing dashboard:', error);
   }
 }
 
 // Initialize when page loads
 window.addEventListener('DOMContentLoaded', init);
+
+// Add touch support for mobile
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.getElementById('picturesCarousel').addEventListener('touchstart', (e) => {
+  touchStartX = e.changedTouches[0].screenX;
+});
+
+document.getElementById('picturesCarousel').addEventListener('touchend', (e) => {
+  touchEndX = e.changedTouches[0].screenX;
+  handleSwipe();
+});
+
+function handleSwipe() {
+  const swipeThreshold = 50;
+  const diff = touchStartX - touchEndX;
+  
+  if (Math.abs(diff) > swipeThreshold) {
+    if (diff > 0) {
+      // Swipe left - next image
+      if (images.length > 0) {
+        currentImageIndex = (currentImageIndex + 1) % images.length;
+        updateCarousel();
+      }
+    } else {
+      // Swipe right - previous image
+      if (images.length > 0) {
+        currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+        updateCarousel();
+      }
+    }
+  }
+}
 </script>
 
 <style>
@@ -463,6 +556,9 @@ window.addEventListener('DOMContentLoaded', init);
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
   border-left: 4px solid #667eea;
   transition: all 0.3s ease;
+  color: #333 !important;
+  opacity: 1 !important;
+  animation: fadeIn 0.5s ease !important;
 }
 
 .announcement-card:hover {
@@ -519,6 +615,9 @@ window.addEventListener('DOMContentLoaded', init);
   text-align: center;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
+  color: #333 !important;
+  opacity: 1 !important;
+  animation: fadeIn 0.5s ease !important;
 }
 
 .officer-card:hover {
@@ -559,6 +658,7 @@ window.addEventListener('DOMContentLoaded', init);
   width: 100%;
   height: 100%;
   object-fit: cover;
+  opacity: 1 !important;
 }
 
 .carousel-caption {
@@ -608,6 +708,8 @@ window.addEventListener('DOMContentLoaded', init);
   margin-bottom: 20px;
   border: 2px solid #667eea20;
   transition: all 0.5s ease;
+  color: #333 !important;
+  opacity: 1 !important;
 }
 
 .reviewer-display:hover {
@@ -674,21 +776,6 @@ window.addEventListener('DOMContentLoaded', init);
   font-style: italic;
 }
 
-.floating-elements {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: -1;
-}
-
-.floating-element {
-  position: absolute;
-  animation: float 10s ease-in-out infinite;
-}
-
 .featured-badge {
   display: inline-block;
   background: #ffd700;
@@ -706,6 +793,101 @@ window.addEventListener('DOMContentLoaded', init);
   }
   50% {
     transform: translateY(-20px) rotate(5deg);
+  }
+}
+
+/* ================= Mobile Responsive ================= */
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+  
+  .dashboard-column {
+    gap: 20px;
+  }
+  
+  .header-card h1 {
+    font-size: 1.5rem !important;
+    margin-right: 80px;
+  }
+  
+  .logoutBtn {
+    position: absolute !important;
+    top: 20px;
+    right: 20px;
+    padding: 8px 15px !important;
+    font-size: 0.9rem !important;
+  }
+  
+  .officers-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px;
+  }
+  
+  .gallery-carousel {
+    height: 200px !important;
+  }
+  
+  .reviewer-display {
+    padding: 20px 15px !important;
+  }
+  
+  .reviewer-nav {
+    flex-direction: column !important;
+    gap: 10px;
+  }
+  
+  .nav-btn {
+    width: 100% !important;
+  }
+  
+  .announcements-feed {
+    max-height: 300px;
+  }
+  
+  .announcement-card {
+    padding: 15px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 10px !important;
+  }
+  
+  .officers-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .header-card {
+    padding: 20px 15px !important;
+    text-align: center;
+  }
+  
+  .header-card h1 {
+    margin-right: 0 !important;
+    font-size: 1.3rem !important;
+  }
+  
+  .logoutBtn {
+    position: relative !important;
+    top: 0 !important;
+    right: 0 !important;
+    margin: 10px auto !important;
+    width: 100%;
+  }
+  
+  .section-card {
+    padding: 20px 15px !important;
+  }
+  
+  .reviewer-content h3 {
+    font-size: 1.2rem;
+  }
+  
+  .reviewer-content p {
+    font-size: 1rem;
   }
 }
 </style>
