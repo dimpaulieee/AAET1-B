@@ -1,7 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard</title>
+</head>
+<body>
+
+<h1>Admin Dashboard</h1>
+
 <h2>Add Reviewer</h2>
 <form id="addReviewerForm">
   <input type="text" id="reviewerName" placeholder="Name" required>
   <input type="text" id="reviewerSubject" placeholder="Subject" required>
+  <input type="text" id="reviewerLink" placeholder="Link (optional)">
   <button type="submit">Add Reviewer</button>
 </form>
 
@@ -19,11 +31,13 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const name = document.getElementById('reviewerName').value;
   const subject = document.getElementById('reviewerSubject').value;
+  const link = document.getElementById('reviewerLink').value;
 
   try {
     await addDoc(collection(db, 'reviewers'), {
       name,
       subject,
+      link: link || "",
       addedBy: auth.currentUser.uid,
       createdAt: new Date().toISOString()
     });
@@ -42,7 +56,11 @@ async function loadReviewers() {
   querySnapshot.forEach((doc) => {
     const data = doc.data();
     const li = document.createElement('li');
-    li.innerText = `${data.name} - ${data.subject}`;
+    if (data.link) {
+      li.innerHTML = `<a href="${data.link}" target="_blank">${data.name} - ${data.subject}</a>`;
+    } else {
+      li.innerText = `${data.name} - ${data.subject}`;
+    }
     list.appendChild(li);
   });
 }
@@ -51,3 +69,5 @@ async function loadReviewers() {
 loadReviewers();
 </script>
 
+</body>
+</html>
