@@ -23,6 +23,7 @@ body {
   margin: 0;
   padding: 20px;
   overflow-x: hidden;
+  color: #333 !important;
 }
 
 .container, .intro-container {
@@ -192,7 +193,7 @@ body {
   border: none;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.1);
-  color: white;
+  color: #333 !important;
   font-size: 1rem;
   transition: var(--transition);
   border: 2px solid transparent;
@@ -207,6 +208,7 @@ body {
   background: rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.4);
   transform: translateY(-2px);
+  color: #333 !important;
 }
 
 .login-form button {
@@ -287,6 +289,7 @@ body {
   margin-bottom: 10px;
   position: relative;
   z-index: 1;
+  color: white;
 }
 
 .motto {
@@ -295,6 +298,7 @@ body {
   opacity: 0.9;
   position: relative;
   z-index: 1;
+  color: white !important;
 }
 
 .logoutBtn {
@@ -330,6 +334,7 @@ body {
   transition: var(--transition);
   position: relative;
   overflow: hidden;
+  color: #333 !important;
 }
 
 .section-card:hover {
@@ -379,6 +384,8 @@ textarea {
   font-size: 1rem;
   transition: var(--transition);
   font-family: 'Poppins', sans-serif;
+  color: #333 !important;
+  background: white !important;
 }
 
 input[type="text"]:focus,
@@ -454,6 +461,7 @@ ul li {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: #333 !important;
 }
 
 ul li:hover {
@@ -505,6 +513,7 @@ ul li button {
   border: 2px solid transparent;
   transition: var(--transition);
   animation: fadeInUp 0.5s ease;
+  color: #333 !important;
 }
 
 .reviewer-card:hover {
@@ -594,6 +603,7 @@ ul li button {
   width: 90%;
   animation: fadeInUp 0.4s ease;
   position: relative;
+  color: #333 !important;
 }
 
 .modal-close {
@@ -668,6 +678,19 @@ ul li button {
   .admin-controls {
     grid-template-columns: 1fr;
   }
+  
+  /* Mobile adjustments for all pages */
+  .logoutBtn {
+    position: relative !important;
+    top: 0 !important;
+    right: 0 !important;
+    margin-top: 15px;
+    width: 100%;
+  }
+  
+  .header-card {
+    text-align: center;
+  }
 }
 
 @media (max-width: 480px) {
@@ -679,11 +702,20 @@ ul li button {
     font-size: 2.5rem;
   }
   
-  .logoutBtn {
-    position: relative;
-    top: 0;
-    right: 0;
-    margin-top: 15px;
-    width: 100%;
+  .section-card {
+    padding: 15px;
+  }
+  
+  button {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+  }
+  
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  textarea {
+    padding: 12px 15px;
   }
 }
+</style>
