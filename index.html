@@ -15,6 +15,26 @@
     <img src="assets/section1.jpg" alt="AAET 1-B Photo 1">
     <img src="assets/section2.jpg" alt="AAET 1-B Photo 2">
   </div>
+
+  <!-- Login Buttons -->
+  <div class="login-buttons fadeIn delay3">
+    <button id="studentLoginBtn">Student Login</button>
+    <button id="adminLoginBtn">Admin Login</button>
+  </div>
 </div>
+
+<script type="module">
+import { auth } from './js/firebase.js';
+import { signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+// Redirect student/admin to their pages
+document.getElementById('studentLoginBtn').addEventListener('click', () => {
+  window.location.href = 'login.html'; // login.html handles email/password and role
+});
+
+document.getElementById('adminLoginBtn').addEventListener('click', () => {
+  window.location.href = 'login.html'; // same login page, role determines redirection
+});
+</script>
 </body>
 </html>
