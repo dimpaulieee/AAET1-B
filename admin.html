@@ -53,7 +53,7 @@
     <section class="section-card">
       <h2><i class="fas fa-quote-left"></i> Section Motto</h2>
       <div class="motto-control">
-        <input type="text" id="mottoInput" placeholder="Enter new section motto...">
+        <input type="text" id="mottoInput" placeholder="Enter new section motto..." style="color: #333 !important; background: white !important;">
         <button id="saveMottoBtn" class="primary-btn"><i class="fas fa-save"></i> Save Motto</button>
       </div>
       <p class="current-motto-display">Current Motto: <span id="mottoDisplay">Loading...</span></p>
@@ -67,8 +67,8 @@
       </div>
       
       <div class="form-row">
-        <input type="text" id="announcementTitle" placeholder="Announcement Title">
-        <textarea id="announcementContent" placeholder="Announcement Content..."></textarea>
+        <input type="text" id="announcementTitle" placeholder="Announcement Title" style="color: #333 !important; background: white !important;">
+        <textarea id="announcementContent" placeholder="Announcement Content..." style="color: #333 !important; background: white !important;"></textarea>
         <button id="addAnnouncementBtn" class="primary-btn"><i class="fas fa-plus-circle"></i> Add Announcement</button>
       </div>
       
@@ -83,8 +83,8 @@
       </div>
       
       <div class="form-row">
-        <input type="text" id="officerPosition" placeholder="Position (e.g., President)">
-        <input type="text" id="officerName" placeholder="Officer Name">
+        <input type="text" id="officerPosition" placeholder="Position (e.g., President)" style="color: #333 !important; background: white !important;">
+        <input type="text" id="officerName" placeholder="Officer Name" style="color: #333 !important; background: white !important;">
         <button id="addOfficerBtn" class="primary-btn"><i class="fas fa-user-plus"></i> Add Officer</button>
       </div>
       
@@ -99,9 +99,9 @@
       </div>
       
       <div class="form-row">
-        <input type="text" id="reviewerName" placeholder="Reviewer Name">
-        <input type="text" id="reviewerSubject" placeholder="Subject">
-        <input type="text" id="reviewerLink" placeholder="Resource Link (optional)">
+        <input type="text" id="reviewerName" placeholder="Reviewer Name" style="color: #333 !important; background: white !important;">
+        <input type="text" id="reviewerSubject" placeholder="Subject" style="color: #333 !important; background: white !important;">
+        <input type="text" id="reviewerLink" placeholder="Resource Link (optional)" style="color: #333 !important; background: white !important;">
         <div class="checkbox-container">
           <label>
             <input type="checkbox" id="reviewerFeatured">
@@ -123,8 +123,8 @@
       </div>
       
       <div class="form-row">
-        <input type="text" id="pictureURL" placeholder="Image URL">
-        <input type="text" id="pictureDesc" placeholder="Description (optional)">
+        <input type="text" id="pictureURL" placeholder="Image URL" style="color: #333 !important; background: white !important;">
+        <input type="text" id="pictureDesc" placeholder="Description (optional)" style="color: #333 !important; background: white !important;">
         <button id="addPictureBtn" class="primary-btn"><i class="fas fa-image"></i> Add Picture</button>
       </div>
       
@@ -141,6 +141,12 @@
 import { db, auth } from './js/firebase.js';
 import { collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+// Make delete functions global
+window.deleteOfficer = deleteOfficer;
+window.deleteAnnouncement = deleteAnnouncement;
+window.deleteReviewer = deleteReviewer;
+window.deletePicture = deletePicture;
 
 // Authentication Check
 onAuthStateChanged(auth, (user) => {
@@ -207,19 +213,19 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
 });
 
 // Form Clearing Functions
-function clearOfficerForm() {
+window.clearOfficerForm = function() {
   document.getElementById('officerPosition').value = '';
   document.getElementById('officerName').value = '';
   document.getElementById('officerPosition').focus();
 }
 
-function clearAnnouncementForm() {
+window.clearAnnouncementForm = function() {
   document.getElementById('announcementTitle').value = '';
   document.getElementById('announcementContent').value = '';
   document.getElementById('announcementTitle').focus();
 }
 
-function clearReviewerForm() {
+window.clearReviewerForm = function() {
   document.getElementById('reviewerName').value = '';
   document.getElementById('reviewerSubject').value = '';
   document.getElementById('reviewerLink').value = '';
@@ -227,7 +233,7 @@ function clearReviewerForm() {
   document.getElementById('reviewerName').focus();
 }
 
-function clearPictureForm() {
+window.clearPictureForm = function() {
   document.getElementById('pictureURL').value = '';
   document.getElementById('pictureDesc').value = '';
   document.getElementById('pictureURL').focus();
@@ -477,16 +483,20 @@ async function loadReviewers() {
       reviewerItem.className = `list-item ${reviewer.featured ? 'featured-item' : ''}`;
       
       let linkContent = '';
-      if (reviewer.link) {
-        linkContent = `<a href="${reviewer.link}" target="_blank" class="resource-link">
+      if (reviewer.link && reviewer.link.trim() !== '') {
+        let link = reviewer.link.trim();
+        if (!link.startsWith('http://') && !link.startsWith('https://')) {
+          link = 'https://' + link;
+        }
+        linkContent = `<a href="${link}" target="_blank" class="resource-link">
                         <i class="fas fa-external-link-alt"></i> Link
                       </a>`;
       }
       
       reviewerItem.innerHTML = `
         <div>
-          <strong>${reviewer.name}</strong>
-          <span>${reviewer.subject}</span>
+          <strong>${reviewer.name || ''}</strong>
+          <span>${reviewer.subject || ''}</span>
           <small>${date} ${reviewer.featured ? '🌟 Featured' : ''}</small>
         </div>
         <div class="item-actions">
@@ -738,6 +748,8 @@ window.addEventListener('DOMContentLoaded', initializeDashboard);
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   font-size: 1rem;
+  color: #333 !important;
+  background: white !important;
 }
 
 .current-motto-display {
@@ -768,6 +780,8 @@ window.addEventListener('DOMContentLoaded', initializeDashboard);
   border-radius: 8px;
   font-size: 1rem;
   font-family: 'Poppins', sans-serif;
+  color: #333 !important;
+  background: white !important;
 }
 
 .form-row textarea {
@@ -825,6 +839,20 @@ window.addEventListener('DOMContentLoaded', initializeDashboard);
   padding-right: 5px;
 }
 
+.list-container::-webkit-scrollbar {
+  width: 5px;
+}
+
+.list-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.list-container::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 10px;
+}
+
 .list-item {
   background: #f8f9ff;
   padding: 15px;
@@ -834,6 +862,7 @@ window.addEventListener('DOMContentLoaded', initializeDashboard);
   justify-content: space-between;
   align-items: center;
   animation: slideIn 0.3s ease;
+  color: #333;
 }
 
 .list-item.featured-item {
@@ -1074,6 +1103,7 @@ window.addEventListener('DOMContentLoaded', initializeDashboard);
 .toast span {
   flex: 1;
   font-size: 0.9rem;
+  color: #333;
 }
 
 .toast-close {
@@ -1132,10 +1162,11 @@ window.addEventListener('DOMContentLoaded', initializeDashboard);
   50% { transform: scale(1.1); }
 }
 
-/* Responsive */
+/* ================= Mobile Responsive ================= */
 @media (max-width: 768px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
   
   .motto-control {
@@ -1144,22 +1175,6 @@ window.addEventListener('DOMContentLoaded', initializeDashboard);
   
   .form-row {
     gap: 10px;
-  }
-  
-  .list-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  
-  .item-actions {
-    align-self: flex-end;
-  }
-}
-
-@media (max-width: 480px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
   }
   
   .section-header {
@@ -1172,8 +1187,61 @@ window.addEventListener('DOMContentLoaded', initializeDashboard);
     align-self: flex-start;
   }
   
+  .list-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .item-actions {
+    align-self: flex-end;
+  }
+  
+  .pictures-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
   .toast {
     min-width: 250px;
+    max-width: 90vw;
+    left: 5vw;
+    right: 5vw;
+  }
+  
+  .header-card h1 {
+    font-size: 1.5rem;
+    margin-right: 80px;
+  }
+  
+  .logoutBtn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 8px 15px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .pictures-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .container {
+    padding: 10px;
+  }
+  
+  .section-card {
+    padding: 20px 15px;
+  }
+  
+  .toast {
+    min-width: 200px;
+    font-size: 0.9rem;
   }
 }
 </style>
