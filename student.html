@@ -3,47 +3,139 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Student Dashboard</title>
+<title>AAET 1-B | Student Dashboard</title>
 <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
 <div class="container">
-  <h1>Student Dashboard</h1>
-  <div id="reviewerDisplay" class="card" style="text-align:center; font-size: 18px;"></div>
-  <button id="nextBtn">Next Reviewer</button>
+
+  <!-- Header -->
+  <header class="header-card">
+    <h1 id="sectionName">AAET 1-B</h1>
+    <p id="sectionMotto" class="motto"></p>
+    <button id="logoutBtn" class="logoutBtn">Logout</button>
+  </header>
+
+  <!-- Section Pictures Carousel -->
+  <section class="section-card">
+    <h2>Section Pictures</h2>
+    <div id="picturesCarousel" class="carousel"></div>
+  </section>
+
+  <!-- Officers -->
+  <section class="section-card">
+    <h2>Section Officers</h2>
+    <ul id="officersList"></ul>
+  </section>
+
+  <!-- Announcements -->
+  <section class="section-card">
+    <h2>Announcements</h2>
+    <ul id="announcementsList"></ul>
+  </section>
+
+  <!-- Reviewers -->
+  <section class="section-card">
+    <h2>Reviewers</h2>
+    <div id="reviewerDisplay" class="reviewer-card"></div>
+    <button id="nextReviewerBtn" class="nextBtn">Next Reviewer</button>
+  </section>
+
 </div>
 
 <script type="module">
-import { db } from './js/firebase.js';
-import { collection, getDocs, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { db, auth } from './js/firebase.js';
+import { collection, getDocs, doc, getDoc, orderBy, query } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
+// Logout
+document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+  await signOut(auth);
+  window.location.href = 'index.html';
+});
+
+/* ===== Section Motto ===== */
+async function loadMotto(){
+  const docRef = doc(db,'sectionInfo','AAET1B');
+  const snap = await getDoc(docRef);
+  document.getElementById('sectionMotto').innerText = snap.exists() ? snap.data().motto : '';
+}
+loadMotto();
+
+/* ===== Pictures Carousel ===== */
+async function loadPictures(){
+  const carousel = document.getElementById('picturesCarousel');
+  carousel.innerHTML='';
+  const snapshot = await getDocs(collection(db,'pictures'));
+  snapshot.forEach(docSnap=>{
+    const img = document.createElement('img');
+    img.src = docSnap.data().url;
+    img.alt = docSnap.data().description;
+    img.title = docSnap.data().description;
+    img.classList.add('carousel-img');
+    carousel.appendChild(img);
+  });
+}
+loadPictures();
+
+/* ===== Officers ===== */
+async function loadOfficers(){
+  const officersList = document.getElementById('officersList');
+  officersList.innerHTML='';
+  const snapshot = await getDocs(collection(db,'officers'));
+  snapshot.forEach(docSnap=>{
+    const li = document.createElement('li');
+    li.innerText = `${docSnap.data().position}: ${docSnap.data().name}`;
+    li.classList.add('fadeIn');
+    officersList.appendChild(li);
+  });
+}
+loadOfficers();
+
+/* ===== Announcements ===== */
+async function loadAnnouncements(){
+  const announcementsList = document.getElementById('announcementsList');
+  announcementsList.innerHTML='';
+  const snapshot = await getDocs(collection(db,'announcements'));
+  snapshot.forEach(docSnap=>{
+    const li = document.createElement('li');
+    li.innerHTML = `<strong>${docSnap.data().title}</strong>: ${docSnap.data().content}`;
+    li.classList.add('fadeIn');
+    announcementsList.appendChild(li);
+  });
+}
+loadAnnouncements();
+
+/* ===== Reviewers ===== */
 let reviewers = [];
-let index = 0;
-const display = document.getElementById('reviewerDisplay');
-const nextBtn = document.getElementById('nextBtn');
+let reviewerIndex = 0;
+const reviewerDisplay = document.getElementById('reviewerDisplay');
+const nextReviewerBtn = document.getElementById('nextReviewerBtn');
 
-async function loadReviewers() {
-  const q = query(collection(db, 'reviewers'), orderBy('createdAt', 'asc'));
+async function loadReviewers(){
+  const q = query(collection(db,'reviewers'),orderBy('createdAt','asc'));
   const snapshot = await getDocs(q);
-  reviewers = snapshot.docs.map(doc => doc.data());
+  reviewers = snapshot.docs.map(doc=>doc.data());
   showReviewer();
 }
 
-function showReviewer() {
-  if (reviewers.length === 0) {
-    display.innerText = 'No reviewers yet.';
+function showReviewer(){
+  if(reviewers.length===0){
+    reviewerDisplay.innerText='No reviewers yet.';
     return;
   }
-
-  const r = reviewers[index];
-  display.innerHTML = r.link
-    ? `<a href="${r.link}" target="_blank" class="${r.featured ? 'featured' : ''}">${r.name} - ${r.subject}</a>`
-    : `<span class="${r.featured ? 'featured' : ''}">${r.name} - ${r.subject}</span>`;
+  const r = reviewers[reviewerIndex];
+  reviewerDisplay.innerHTML = r.link
+    ? `<a href="${r.link}" target="_blank" class="${r.featured?'featured':''}">${r.name} - ${r.subject}</a>`
+    : `<span class="${r.featured?'featured':''}">${r.name} - ${r.subject}</span>`;
+  reviewerDisplay.classList.remove('fadeIn');
+  void reviewerDisplay.offsetWidth; // trigger reflow
+  reviewerDisplay.classList.add('fadeIn');
 }
 
-nextBtn.addEventListener('click', () => {
-  if (reviewers.length === 0) return;
-  index = (index + 1) % reviewers.length;
+nextReviewerBtn.addEventListener('click',()=>{
+  if(reviewers.length===0) return;
+  reviewerIndex=(reviewerIndex+1)%reviewers.length;
   showReviewer();
 });
 
