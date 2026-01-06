@@ -1,136 +1,36 @@
-body {
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #f0f2f5, #cce0ff);
-  margin: 0;
-  padding: 0;
-}
+/* General */
+body { font-family: Arial,sans-serif; background: linear-gradient(135deg,#f0f2f5,#cce0ff); margin:0; padding:0; }
+.container { max-width:900px; margin:20px auto; text-align:center; }
 
-.container {
-  max-width: 900px;
-  margin: 20px auto;
-  text-align: center;
-}
+/* Header */
+.header-card { background:#007bff; color:white; padding:20px; border-radius:12px; margin-bottom:20px; position:relative; animation:slideDown 1s ease-out; }
+.motto { font-style:italic; font-size:18px; margin-top:5px; }
+.logoutBtn { position:absolute; top:20px; right:20px; padding:8px 12px; background:#d9534f; border:none; color:white; border-radius:5px; cursor:pointer; }
+.logoutBtn:hover { background:#c9302c; }
 
-.header-card {
-  background: #007bff;
-  color: white;
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  position: relative;
-  animation: slideDown 1s ease-out;
-}
+/* Section Cards */
+.section-card { background:#fff; padding:20px; margin:15px 0; border-radius:12px; box-shadow:0px 5px 15px rgba(0,0,0,0.1); animation:fadeUp 1s ease; }
+.section-card h2 { margin-bottom:15px; }
 
-.motto {
-  font-style: italic;
-  font-size: 18px;
-  margin-top: 5px;
-}
+/* Carousel */
+.carousel { display:flex; overflow-x:auto; gap:10px; padding:10px; }
+.carousel img { width:45%; border-radius:10px; transition:transform 0.3s; }
+.carousel img:hover { transform:scale(1.05); }
 
-.logoutBtn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  padding: 8px 12px;
-  background: #d9534f;
-  border: none;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
-}
+/* Lists */
+ul { list-style:none; padding-left:0; }
+ul li { margin:5px 0; animation:fadeUp 1s ease; }
 
-.logoutBtn:hover {
-  background: #c9302c;
-}
+/* Reviewers */
+.reviewer-card { background:#f9f9f9; padding:15px; margin:10px auto; border-radius:8px; font-size:20px; font-weight:bold; transition:all 0.5s ease; }
+.featured { color:#d9534f; font-weight:bold; animation:blink 1.5s infinite; }
+.nextBtn { margin-top:10px; padding:10px 20px; background:#28a745; border:none; color:white; border-radius:5px; cursor:pointer; }
+.nextBtn:hover { background:#218838; }
+a { text-decoration:none; color:#007bff; }
+a:hover { text-decoration:underline; }
 
-.section-card {
-  background: #fff;
-  padding: 20px;
-  margin: 15px 0;
-  border-radius: 12px;
-  box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
-  animation: fadeUp 1s ease;
-}
-
-.pictures img {
-  width: 45%;
-  margin: 5px;
-  border-radius: 10px;
-  transition: transform 0.3s;
-}
-
-.pictures img:hover {
-  transform: scale(1.05);
-}
-
-.officers {
-  list-style: none;
-  padding: 0;
-}
-
-.officers li {
-  margin: 5px 0;
-}
-
-#announcements ul {
-  text-align: left;
-  padding-left: 20px;
-}
-
-#reviewerDisplay.reviewer-card {
-  background: #f9f9f9;
-  padding: 15px;
-  margin: 10px auto;
-  border-radius: 8px;
-  font-size: 20px;
-  font-weight: bold;
-  transition: all 0.5s ease;
-}
-
-.featured {
-  color: #d9534f;
-  animation: blink 1.5s infinite;
-  font-weight: bold;
-}
-
-.nextBtn {
-  margin-top: 10px;
-  padding: 10px 20px;
-  background: #28a745;
-  border: none;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.nextBtn:hover {
-  background: #218838;
-}
-
-a {
-  text-decoration: none;
-  color: #007bff;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-@keyframes blink {
-  0%,50%,100% {opacity:1;}
-  25%,75% {opacity:0.5;}
-}
-
-@keyframes slideDown {
-  from {opacity:0; transform: translateY(-50px);}
-  to {opacity:1; transform: translateY(0);}
-}
-
-@keyframes fadeUp {
-  from {opacity:0; transform: translateY(20px);}
-  to {opacity:1; transform: translateY(0);}
-}
-
-.fadeIn {
-  animation: fadeUp 0.5s ease;
-}
+/* Animations */
+@keyframes blink { 0%,50%,100%{opacity:1;} 25%,75%{opacity:0.5;} }
+@keyframes slideDown { from{opacity:0;transform:translateY(-50px);} to{opacity:1;transform:translateY(0);} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+.fadeIn { animation:fadeUp 0.5s ease; }
