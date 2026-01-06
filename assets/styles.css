@@ -1,36 +1,233 @@
-/* General */
-body { font-family: Arial,sans-serif; background: linear-gradient(135deg,#f0f2f5,#cce0ff); margin:0; padding:0; }
-.container { max-width:900px; margin:20px auto; text-align:center; }
+/* ================= General Styles ================= */
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #f0f2f5, #cce0ff);
+  margin: 0;
+  padding: 0;
+}
 
-/* Header */
-.header-card { background:#007bff; color:white; padding:20px; border-radius:12px; margin-bottom:20px; position:relative; animation:slideDown 1s ease-out; }
-.motto { font-style:italic; font-size:18px; margin-top:5px; }
-.logoutBtn { position:absolute; top:20px; right:20px; padding:8px 12px; background:#d9534f; border:none; color:white; border-radius:5px; cursor:pointer; }
-.logoutBtn:hover { background:#c9302c; }
+.container, .intro-container {
+  max-width: 900px;
+  margin: 20px auto;
+  text-align: center;
+}
 
-/* Section Cards */
-.section-card { background:#fff; padding:20px; margin:15px 0; border-radius:12px; box-shadow:0px 5px 15px rgba(0,0,0,0.1); animation:fadeUp 1s ease; }
-.section-card h2 { margin-bottom:15px; }
+/* ================= Header ================= */
+.header-card {
+  background: #007bff;
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  position: relative;
+  animation: slideDown 1s ease-out;
+}
 
-/* Carousel */
-.carousel { display:flex; overflow-x:auto; gap:10px; padding:10px; }
-.carousel img { width:45%; border-radius:10px; transition:transform 0.3s; }
-.carousel img:hover { transform:scale(1.05); }
+.header-card h1 {
+  margin: 0;
+  font-size: 28px;
+}
 
-/* Lists */
-ul { list-style:none; padding-left:0; }
-ul li { margin:5px 0; animation:fadeUp 1s ease; }
+.motto {
+  font-style: italic;
+  font-size: 18px;
+  margin-top: 5px;
+}
 
-/* Reviewers */
-.reviewer-card { background:#f9f9f9; padding:15px; margin:10px auto; border-radius:8px; font-size:20px; font-weight:bold; transition:all 0.5s ease; }
-.featured { color:#d9534f; font-weight:bold; animation:blink 1.5s infinite; }
-.nextBtn { margin-top:10px; padding:10px 20px; background:#28a745; border:none; color:white; border-radius:5px; cursor:pointer; }
-.nextBtn:hover { background:#218838; }
-a { text-decoration:none; color:#007bff; }
-a:hover { text-decoration:underline; }
+.logoutBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 8px 12px;
+  background: #d9534f;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
 
-/* Animations */
-@keyframes blink { 0%,50%,100%{opacity:1;} 25%,75%{opacity:0.5;} }
-@keyframes slideDown { from{opacity:0;transform:translateY(-50px);} to{opacity:1;transform:translateY(0);} }
-@keyframes fadeUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
-.fadeIn { animation:fadeUp 0.5s ease; }
+.logoutBtn:hover {
+  background: #c9302c;
+}
+
+/* ================= Section Cards ================= */
+.section-card {
+  background: #fff;
+  padding: 20px;
+  margin: 15px 0;
+  border-radius: 12px;
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+  animation: fadeUp 1s ease;
+}
+
+.section-card h2 {
+  margin-bottom: 15px;
+  font-size: 22px;
+}
+
+/* ================= Carousel / Pictures ================= */
+.carousel, .intro-visuals {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  padding: 10px;
+}
+
+.carousel img, .intro-visuals img {
+  width: 45%;
+  border-radius: 10px;
+  transition: transform 0.3s;
+}
+
+.carousel img:hover, .intro-visuals img:hover {
+  transform: scale(1.05);
+}
+
+/* ================= Lists ================= */
+ul {
+  list-style: none;
+  padding-left: 0;
+  text-align: left;
+}
+
+ul li {
+  margin: 5px 0;
+  animation: fadeUp 1s ease;
+}
+
+/* ================= Reviewers ================= */
+.reviewer-card {
+  background: #f9f9f9;
+  padding: 15px;
+  margin: 10px auto;
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: bold;
+  transition: all 0.5s ease;
+}
+
+.featured {
+  color: #d9534f;
+  font-weight: bold;
+  animation: blink 1.5s infinite;
+}
+
+.nextBtn {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background: #28a745;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.nextBtn:hover {
+  background: #218838;
+}
+
+a {
+  text-decoration: none;
+  color: #007bff;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ================= Login Buttons (Index Page) ================= */
+.login-buttons {
+  margin-top: 30px;
+}
+
+.login-buttons button {
+  padding: 12px 25px;
+  margin: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#studentLoginBtn {
+  background: #007bff;
+  color: white;
+}
+
+#studentLoginBtn:hover {
+  background: #0056b3;
+}
+
+#adminLoginBtn {
+  background: #28a745;
+  color: white;
+}
+
+#adminLoginBtn:hover {
+  background: #1e7e34;
+}
+
+/* ================= Animations ================= */
+@keyframes blink {
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0.5; }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-50px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fadeIn {
+  animation: fadeUp 0.5s ease;
+}
+
+/* ================= Intro Page Specific ================= */
+.intro-container h1 {
+  font-size: 36px;
+  margin-top: 50px;
+}
+
+.intro-container p {
+  font-size: 20px;
+  margin-top: 10px;
+}
+
+.intro-container .login-buttons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 40px;
+}
+
+/* ================= Pictures Preview in Admin ================= */
+.pictures-preview img {
+  width: 100px;
+  margin: 5px;
+  border-radius: 8px;
+  transition: transform 0.3s;
+}
+
+.pictures-preview img:hover {
+  transform: scale(1.1);
+}
+
+/* ================= Responsive ================= */
+@media (max-width: 600px) {
+  .carousel img, .intro-visuals img {
+    width: 80%;
+  }
+
+  .login-buttons button {
+    width: 80%;
+  }
+}
