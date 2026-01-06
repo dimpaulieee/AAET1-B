@@ -3,80 +3,209 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Dashboard</title>
+<title>AAET 1-B | Admin Dashboard</title>
 <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
 <div class="container">
-  <h1>Admin Dashboard</h1>
-  <form id="addReviewerForm" class="card">
-    <input type="text" id="reviewerName" placeholder="Name" required>
-    <input type="text" id="reviewerSubject" placeholder="Subject" required>
+
+  <header class="header-card">
+    <h1>Admin Dashboard | AAET 1-B</h1>
+    <button id="logoutBtn" class="logoutBtn">Logout</button>
+  </header>
+
+  <!-- Section Info / Motto -->
+  <section class="section-card">
+    <h2>Section Motto</h2>
+    <input type="text" id="mottoInput" placeholder="Enter Section Motto">
+    <button id="saveMottoBtn">Save Motto</button>
+    <p id="currentMotto">Current Motto: ...</p>
+  </section>
+
+  <!-- Officers -->
+  <section class="section-card">
+    <h2>Section Officers</h2>
+    <input type="text" id="officerPosition" placeholder="Position">
+    <input type="text" id="officerName" placeholder="Name">
+    <button id="addOfficerBtn">Add Officer</button>
+    <ul id="officersList"></ul>
+  </section>
+
+  <!-- Section Pictures -->
+  <section class="section-card">
+    <h2>Section Pictures</h2>
+    <input type="text" id="pictureURL" placeholder="Image URL">
+    <input type="text" id="pictureDesc" placeholder="Description">
+    <button id="addPictureBtn">Add Picture</button>
+    <div id="picturesList" class="pictures-preview"></div>
+  </section>
+
+  <!-- Announcements -->
+  <section class="section-card">
+    <h2>Announcements</h2>
+    <input type="text" id="announcementTitle" placeholder="Title">
+    <textarea id="announcementContent" placeholder="Content"></textarea>
+    <button id="addAnnouncementBtn">Add Announcement</button>
+    <ul id="announcementsList"></ul>
+  </section>
+
+  <!-- Reviewers -->
+  <section class="section-card">
+    <h2>Reviewers</h2>
+    <input type="text" id="reviewerName" placeholder="Name">
+    <input type="text" id="reviewerSubject" placeholder="Subject">
     <input type="text" id="reviewerLink" placeholder="Link (optional)">
     <label><input type="checkbox" id="reviewerFeatured"> Featured</label>
-    <button type="submit">Add Reviewer</button>
-  </form>
+    <button id="addReviewerBtn">Add Reviewer</button>
+    <ul id="reviewersList"></ul>
+  </section>
 
-  <h2>Current Reviewers</h2>
-  <table id="reviewersTable">
-    <thead>
-      <tr><th>Name</th><th>Subject</th><th>Featured</th><th>Link</th><th>Action</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
 </div>
 
 <script type="module">
 import { db, auth } from './js/firebase.js';
-import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
-const form = document.getElementById('addReviewerForm');
-const tableBody = document.querySelector('#reviewersTable tbody');
+// Logout
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await signOut(auth);
+  window.location.href = 'index.html';
+});
 
-async function loadReviewers() {
-  tableBody.innerHTML = '';
-  const snapshot = await getDocs(collection(db, 'reviewers'));
-  snapshot.forEach((docSnap) => {
-    const data = docSnap.data();
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${data.name}</td>
-      <td>${data.subject}</td>
-      <td>${data.featured ? '✅' : ''}</td>
-      <td>${data.link ? `<a href="${data.link}" target="_blank">Link</a>` : ''}</td>
-      <td>
-        <button class="deleteBtn">Delete</button>
-        <button class="toggleFeaturedBtn">${data.featured ? 'Unfeature' : 'Feature'}</button>
-      </td>
-    `;
-    tableBody.appendChild(tr);
+/* ===== Section Motto ===== */
+const mottoInput = document.getElementById('mottoInput');
+const saveMottoBtn = document.getElementById('saveMottoBtn');
+const currentMotto = document.getElementById('currentMotto');
 
-    // Delete
-    tr.querySelector('.deleteBtn').addEventListener('click', async () => {
-      await deleteDoc(doc(db, 'reviewers', docSnap.id));
-      loadReviewers();
-    });
+async function loadMotto() {
+  const docRef = doc(db, 'sectionInfo', 'AAET1B');
+  const snap = await getDoc(docRef);
+  currentMotto.innerText = 'Current Motto: ' + (snap.exists() ? snap.data().motto : '...');
+}
 
-    // Toggle Featured
-    tr.querySelector('.toggleFeaturedBtn').addEventListener('click', async () => {
-      await updateDoc(doc(db, 'reviewers', docSnap.id), { featured: !data.featured });
-      loadReviewers();
-    });
+saveMottoBtn.addEventListener('click', async () => {
+  const motto = mottoInput.value;
+  if (!motto) return alert('Enter a motto!');
+  await setDoc(doc(db, 'sectionInfo', 'AAET1B'), { motto, updatedAt: new Date().toISOString() });
+  mottoInput.value = '';
+  loadMotto();
+});
+
+loadMotto();
+
+/* ===== Officers ===== */
+const officerPosition = document.getElementById('officerPosition');
+const officerName = document.getElementById('officerName');
+const addOfficerBtn = document.getElementById('addOfficerBtn');
+const officersList = document.getElementById('officersList');
+
+async function loadOfficers() {
+  officersList.innerHTML = '';
+  const snapshot = await getDocs(collection(db, 'officers'));
+  snapshot.forEach(docSnap => {
+    const li = document.createElement('li');
+    li.innerText = `${docSnap.data().position}: ${docSnap.data().name}`;
+    const delBtn = document.createElement('button'); delBtn.innerText='Delete';
+    delBtn.addEventListener('click', async () => { await deleteDoc(doc(db,'officers',docSnap.id)); loadOfficers(); });
+    li.appendChild(delBtn);
+    officersList.appendChild(li);
   });
 }
 
-// Add reviewer
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const name = document.getElementById('reviewerName').value;
-  const subject = document.getElementById('reviewerSubject').value;
-  const link = document.getElementById('reviewerLink').value;
-  const featured = document.getElementById('reviewerFeatured').checked;
+addOfficerBtn.addEventListener('click', async () => {
+  const pos = officerPosition.value;
+  const name = officerName.value;
+  if (!pos || !name) return alert('Enter both position and name!');
+  await addDoc(collection(db, 'officers'), { position: pos, name });
+  officerPosition.value=''; officerName.value='';
+  loadOfficers();
+});
 
-  await addDoc(collection(db, 'reviewers'), {
-    name, subject, link: link || "", featured, addedBy: auth.currentUser.uid, createdAt: new Date().toISOString()
+loadOfficers();
+
+/* ===== Pictures ===== */
+const pictureURL = document.getElementById('pictureURL');
+const pictureDesc = document.getElementById('pictureDesc');
+const addPictureBtn = document.getElementById('addPictureBtn');
+const picturesList = document.getElementById('picturesList');
+
+async function loadPictures() {
+  picturesList.innerHTML='';
+  const snapshot = await getDocs(collection(db,'pictures'));
+  snapshot.forEach(docSnap => {
+    const img = document.createElement('img');
+    img.src = docSnap.data().url;
+    img.alt = docSnap.data().description;
+    img.title = docSnap.data().description;
+    picturesList.appendChild(img);
   });
-  form.reset();
+}
+
+addPictureBtn.addEventListener('click', async () => {
+  const url = pictureURL.value;
+  const desc = pictureDesc.value;
+  if(!url) return alert('Enter image URL!');
+  await addDoc(collection(db,'pictures'),{ url, description: desc });
+  pictureURL.value=''; pictureDesc.value='';
+  loadPictures();
+});
+
+loadPictures();
+
+/* ===== Announcements ===== */
+const announcementTitle = document.getElementById('announcementTitle');
+const announcementContent = document.getElementById('announcementContent');
+const addAnnouncementBtn = document.getElementById('addAnnouncementBtn');
+const announcementsList = document.getElementById('announcementsList');
+
+async function loadAnnouncements() {
+  announcementsList.innerHTML='';
+  const snapshot = await getDocs(collection(db,'announcements'));
+  snapshot.forEach(docSnap => {
+    const li = document.createElement('li');
+    li.innerHTML = `<strong>${docSnap.data().title}</strong>: ${docSnap.data().content}`;
+    announcementsList.appendChild(li);
+  });
+}
+
+addAnnouncementBtn.addEventListener('click', async () => {
+  const title = announcementTitle.value;
+  const content = announcementContent.value;
+  if(!title || !content) return alert('Enter title and content!');
+  await addDoc(collection(db,'announcements'), { title, content, createdAt: new Date().toISOString() });
+  announcementTitle.value=''; announcementContent.value='';
+  loadAnnouncements();
+});
+
+loadAnnouncements();
+
+/* ===== Reviewers ===== */
+const reviewerName = document.getElementById('reviewerName');
+const reviewerSubject = document.getElementById('reviewerSubject');
+const reviewerLink = document.getElementById('reviewerLink');
+const reviewerFeatured = document.getElementById('reviewerFeatured');
+const addReviewerBtn = document.getElementById('addReviewerBtn');
+const reviewersList = document.getElementById('reviewersList');
+
+async function loadReviewers() {
+  reviewersList.innerHTML='';
+  const snapshot = await getDocs(collection(db,'reviewers'));
+  snapshot.forEach(docSnap=>{
+    const li = document.createElement('li');
+    li.innerHTML = `${docSnap.data().name} - ${docSnap.data().subject} ${docSnap.data().featured?'🌟':''} <a href="${docSnap.data().link||'#'}" target="_blank">Link</a>`;
+    reviewersList.appendChild(li);
+  });
+}
+
+addReviewerBtn.addEventListener('click', async()=>{
+  const name = reviewerName.value;
+  const subject = reviewerSubject.value;
+  const link = reviewerLink.value;
+  const featured = reviewerFeatured.checked;
+  if(!name || !subject) return alert('Enter name and subject!');
+  await addDoc(collection(db,'reviewers'), { name, subject, link: link||'', featured, createdAt: new Date().toISOString() });
+  reviewerName.value=''; reviewerSubject.value=''; reviewerLink.value=''; reviewerFeatured.checked=false;
   loadReviewers();
 });
 
