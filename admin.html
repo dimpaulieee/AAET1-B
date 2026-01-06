@@ -1,12 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
-</head>
-<body>
-  <h1>Welcome Admin!</h1>
-  <p>You are logged in as Admin.</p>
-</body>
-</html>
+<h2>Add Reviewer</h2>
+<form id="addReviewerForm">
+  <input type="text" id="reviewerName" placeholder="Name" required>
+  <input type="text" id="reviewerSubject" placeholder="Subject" required>
+  <button type="submit">Add Reviewer</button>
+</form>
+
+<h3>Current Reviewers:</h3>
+<ul id="reviewersList"></ul>
+
+<script type="module">
+import { db, auth } from './js/firebase.js';
+import { collection, addDoc, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+const form = document.getElementById('addReviewerForm');
+const list = document.getElementById('reviewersList');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('reviewerName').value;
+  const subject = document.getElementById('reviewerSubject').value;
+
+  try {
+    await addDoc(collection(db, 'reviewers'), {
+      name,
+      subject,
+      addedBy: auth.currentUser.uid,
+      createdAt: new Date().toISOString()
+    });
+    alert('Reviewer added!');
+    form.reset();
+    loadReviewers();
+  } catch (err) {
+    alert('Error adding reviewer: ' + err.message);
+  }
+});
+
+// Load reviewers for display
+async function loadReviewers() {
+  list.innerHTML = '';
+  const querySnapshot = await getDocs(collection(db, 'reviewers'));
+  querySnapshot.forEach((doc) => {
+    const data = doc.data();
+    const li = document.createElement('li');
+    li.innerText = `${data.name} - ${data.subject}`;
+    list.appendChild(li);
+  });
+}
+
+// Initial load
+loadReviewers();
+</script>
+
