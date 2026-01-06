@@ -4,18 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Student Dashboard</title>
+<link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
-
-<h1>Student Dashboard</h1>
-
-<h2>Reviewers for You</h2>
-<div id="reviewerDisplay" style="font-size: 18px; margin-bottom: 10px;"></div>
-<button id="nextBtn">Next Reviewer</button>
+<div class="container">
+  <h1>Student Dashboard</h1>
+  <div id="reviewerDisplay" class="card" style="text-align:center; font-size: 18px;"></div>
+  <button id="nextBtn">Next Reviewer</button>
+</div>
 
 <script type="module">
 import { db } from './js/firebase.js';
-import { collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { collection, getDocs, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 let reviewers = [];
 let index = 0;
@@ -23,8 +23,9 @@ const display = document.getElementById('reviewerDisplay');
 const nextBtn = document.getElementById('nextBtn');
 
 async function loadReviewers() {
-  const querySnapshot = await getDocs(collection(db, 'reviewers'));
-  reviewers = querySnapshot.docs.map(doc => doc.data());
+  const q = query(collection(db, 'reviewers'), orderBy('createdAt', 'asc'));
+  const snapshot = await getDocs(q);
+  reviewers = snapshot.docs.map(doc => doc.data());
   showReviewer();
 }
 
@@ -34,22 +35,19 @@ function showReviewer() {
     return;
   }
 
-  const reviewer = reviewers[index];
-  if (reviewer.link) {
-    display.innerHTML = `<a href="${reviewer.link}" target="_blank">${reviewer.name} - ${reviewer.subject}</a>`;
-  } else {
-    display.innerText = `${reviewer.name} - ${reviewer.subject}`;
-  }
+  const r = reviewers[index];
+  display.innerHTML = r.link
+    ? `<a href="${r.link}" target="_blank" class="${r.featured ? 'featured' : ''}">${r.name} - ${r.subject}</a>`
+    : `<span class="${r.featured ? 'featured' : ''}">${r.name} - ${r.subject}</span>`;
 }
 
 nextBtn.addEventListener('click', () => {
   if (reviewers.length === 0) return;
-  index = (index + 1) % reviewers.length; // loop through reviewers
+  index = (index + 1) % reviewers.length;
   showReviewer();
 });
 
 loadReviewers();
 </script>
-
 </body>
 </html>
