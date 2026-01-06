@@ -1,4 +1,4 @@
-// auth.js
+// js/auth.js
 import { auth, db } from "./firebase.js";
 import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const userCred = await signInWithEmailAndPassword(auth, email, password);
       const user = userCred.user;
 
-      // Fetch role from Firestore
+      // Get user role from Firestore
       const docRef = doc(db, "users", user.uid);
       const snap = await getDoc(docRef);
 
