@@ -7,6 +7,47 @@
 <link rel="stylesheet" href="assets/styles.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Mobile responsive fixes */
+@media (max-width: 768px) {
+  .login-card {
+    padding: 30px 20px !important;
+    margin: 20px !important;
+    width: 90% !important;
+  }
+  
+  .logo {
+    font-size: 2.8rem !important;
+  }
+  
+  .login-header h1 {
+    font-size: 1.8rem !important;
+  }
+  
+  .login-btn {
+    padding: 15px !important;
+    font-size: 1rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    padding: 25px 15px !important;
+  }
+  
+  .logo {
+    font-size: 2.5rem !important;
+  }
+  
+  .login-header h1 {
+    font-size: 1.6rem !important;
+  }
+  
+  .demo-credentials {
+    font-size: 0.75rem !important;
+  }
+}
+</style>
 </head>
 <body>
 
@@ -300,12 +341,18 @@ createBackgroundShapes();
   font-family: 'Poppins', sans-serif;
   transition: all 0.3s ease;
   background: white;
+  color: #333 !important; /* Fixed text color */
 }
 
 .input-icon input:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  color: #333 !important;
+}
+
+.input-icon input::placeholder {
+  color: #888;
 }
 
 .show-password {
@@ -487,22 +534,6 @@ createBackgroundShapes();
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
-}
-
-/* Responsive */
-@media (max-width: 480px) {
-  .login-card {
-    padding: 30px 20px;
-    margin: 20px;
-  }
-  
-  .logo {
-    font-size: 2.8rem;
-  }
-  
-  .login-header h1 {
-    font-size: 1.8rem;
-  }
 }
 </style>
 </body>
