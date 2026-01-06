@@ -3,38 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AAET 1-B Introduction</title>
+<title>AAET 1-B | Welcome</title>
 <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
-<div class="intro-container">
-  <h1 class="fadeIn">Welcome to AAET 1-B</h1>
-  <p class="fadeIn delay1">Excellence, Unity, and Growth</p>
 
-  <div class="intro-visuals fadeIn delay2">
-    <img src="assets/section1.jpg" alt="AAET 1-B Photo 1">
-    <img src="assets/section2.jpg" alt="AAET 1-B Photo 2">
-  </div>
+<!-- Background and overlay -->
+<div class="intro-bg">
+  <div class="overlay">
+    <div class="intro-container">
 
-  <!-- Login Buttons -->
-  <div class="login-buttons fadeIn delay3">
-    <button id="studentLoginBtn">Student Login</button>
-    <button id="adminLoginBtn">Admin Login</button>
+      <!-- Section Name & Motto -->
+      <h1 class="fadeIn">AAET 1-B</h1>
+      <p class="fadeIn delay1">Excellence, Unity, and Growth</p>
+
+      <!-- Intro Images -->
+      <div class="intro-visuals fadeIn delay2">
+        <img src="assets/section1.jpg" alt="AAET 1-B Photo 1">
+        <img src="assets/section2.jpg" alt="AAET 1-B Photo 2">
+      </div>
+
+      <!-- Login Button -->
+      <div class="login-btn-container fadeIn delay3">
+        <button id="loginBtn">Login</button>
+      </div>
+
+    </div>
   </div>
 </div>
 
 <script type="module">
-import { auth } from './js/firebase.js';
-import { signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-
-// Redirect student/admin to their pages
-document.getElementById('studentLoginBtn').addEventListener('click', () => {
-  window.location.href = 'login.html'; // login.html handles email/password and role
-});
-
-document.getElementById('adminLoginBtn').addEventListener('click', () => {
-  window.location.href = 'login.html'; // same login page, role determines redirection
-});
+  // Redirect to login page
+  document.getElementById('loginBtn').addEventListener('click', ()=>{
+    window.location.href = 'login.html';
+  });
 </script>
+
 </body>
 </html>
