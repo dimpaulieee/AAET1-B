@@ -1,76 +1,136 @@
 body {
   font-family: Arial, sans-serif;
-  background: #f0f2f5;
+  background: linear-gradient(135deg, #f0f2f5, #cce0ff);
   margin: 0;
   padding: 0;
 }
 
 .container {
-  max-width: 500px;
-  margin: 50px auto;
+  max-width: 900px;
+  margin: 20px auto;
   text-align: center;
 }
 
-h1, h2 {
-  color: #333;
-}
-
-.card {
-  background: #fff;
-  padding: 20px;
-  margin: 20px 0;
-  border-radius: 10px;
-  box-shadow: 0px 3px 10px rgba(0,0,0,0.1);
-}
-
-input {
-  display: block;
-  margin: 10px auto;
-  padding: 10px;
-  width: 90%;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
-
-button {
-  padding: 10px 20px;
+.header-card {
   background: #007bff;
-  color: #fff;
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  position: relative;
+  animation: slideDown 1s ease-out;
+}
+
+.motto {
+  font-style: italic;
+  font-size: 18px;
+  margin-top: 5px;
+}
+
+.logoutBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 8px 12px;
+  background: #d9534f;
   border: none;
+  color: white;
   border-radius: 5px;
   cursor: pointer;
 }
 
-button:hover {
-  background: #0056b3;
+.logoutBtn:hover {
+  background: #c9302c;
 }
 
-.error {
-  color: red;
-  font-size: 14px;
+.section-card {
+  background: #fff;
+  padding: 20px;
+  margin: 15px 0;
+  border-radius: 12px;
+  box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
+  animation: fadeUp 1s ease;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
+.pictures img {
+  width: 45%;
+  margin: 5px;
+  border-radius: 10px;
+  transition: transform 0.3s;
 }
 
-table, th, td {
-  border: 1px solid #ccc;
+.pictures img:hover {
+  transform: scale(1.05);
 }
 
-th, td {
-  padding: 10px;
-  text-align: center;
+.officers {
+  list-style: none;
+  padding: 0;
+}
+
+.officers li {
+  margin: 5px 0;
+}
+
+#announcements ul {
+  text-align: left;
+  padding-left: 20px;
+}
+
+#reviewerDisplay.reviewer-card {
+  background: #f9f9f9;
+  padding: 15px;
+  margin: 10px auto;
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: bold;
+  transition: all 0.5s ease;
 }
 
 .featured {
   color: #d9534f;
-  font-weight: bold;
   animation: blink 1.5s infinite;
+  font-weight: bold;
+}
+
+.nextBtn {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background: #28a745;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.nextBtn:hover {
+  background: #218838;
+}
+
+a {
+  text-decoration: none;
+  color: #007bff;
+}
+
+a:hover {
+  text-decoration: underline;
 }
 
 @keyframes blink {
-  0%, 50%, 100% { opacity: 1; }
-  25%, 75% { opacity: 0.5; }
+  0%,50%,100% {opacity:1;}
+  25%,75% {opacity:0.5;}
+}
+
+@keyframes slideDown {
+  from {opacity:0; transform: translateY(-50px);}
+  to {opacity:1; transform: translateY(0);}
+}
+
+@keyframes fadeUp {
+  from {opacity:0; transform: translateY(20px);}
+  to {opacity:1; transform: translateY(0);}
+}
+
+.fadeIn {
+  animation: fadeUp 0.5s ease;
 }
