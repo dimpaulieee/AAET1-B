@@ -1,5 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Dashboard</title>
+</head>
+<body>
+
+<h1>Student Dashboard</h1>
+
 <h2>Reviewers for You</h2>
-<div id="reviewerDisplay"></div>
+<div id="reviewerDisplay" style="font-size: 18px; margin-bottom: 10px;"></div>
 <button id="nextBtn">Next Reviewer</button>
 
 <script type="module">
@@ -22,7 +33,13 @@ function showReviewer() {
     display.innerText = 'No reviewers yet.';
     return;
   }
-  display.innerText = `${reviewers[index].name} - ${reviewers[index].subject}`;
+
+  const reviewer = reviewers[index];
+  if (reviewer.link) {
+    display.innerHTML = `<a href="${reviewer.link}" target="_blank">${reviewer.name} - ${reviewer.subject}</a>`;
+  } else {
+    display.innerText = `${reviewer.name} - ${reviewer.subject}`;
+  }
 }
 
 nextBtn.addEventListener('click', () => {
@@ -33,3 +50,6 @@ nextBtn.addEventListener('click', () => {
 
 loadReviewers();
 </script>
+
+</body>
+</html>
