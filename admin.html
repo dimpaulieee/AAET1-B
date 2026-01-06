@@ -1,215 +1,689 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AAET 1-B | Admin Dashboard</title>
-<link rel="stylesheet" href="assets/styles.css">
-</head>
-<body>
-<div class="container">
-
-  <header class="header-card">
-    <h1>Admin Dashboard | AAET 1-B</h1>
-    <button id="logoutBtn" class="logoutBtn">Logout</button>
-  </header>
-
-  <!-- Section Info / Motto -->
-  <section class="section-card">
-    <h2>Section Motto</h2>
-    <input type="text" id="mottoInput" placeholder="Enter Section Motto">
-    <button id="saveMottoBtn">Save Motto</button>
-    <p id="currentMotto">Current Motto: ...</p>
-  </section>
-
-  <!-- Officers -->
-  <section class="section-card">
-    <h2>Section Officers</h2>
-    <input type="text" id="officerPosition" placeholder="Position">
-    <input type="text" id="officerName" placeholder="Name">
-    <button id="addOfficerBtn">Add Officer</button>
-    <ul id="officersList"></ul>
-  </section>
-
-  <!-- Section Pictures -->
-  <section class="section-card">
-    <h2>Section Pictures</h2>
-    <input type="text" id="pictureURL" placeholder="Image URL">
-    <input type="text" id="pictureDesc" placeholder="Description">
-    <button id="addPictureBtn">Add Picture</button>
-    <div id="picturesList" class="pictures-preview"></div>
-  </section>
-
-  <!-- Announcements -->
-  <section class="section-card">
-    <h2>Announcements</h2>
-    <input type="text" id="announcementTitle" placeholder="Title">
-    <textarea id="announcementContent" placeholder="Content"></textarea>
-    <button id="addAnnouncementBtn">Add Announcement</button>
-    <ul id="announcementsList"></ul>
-  </section>
-
-  <!-- Reviewers -->
-  <section class="section-card">
-    <h2>Reviewers</h2>
-    <input type="text" id="reviewerName" placeholder="Name">
-    <input type="text" id="reviewerSubject" placeholder="Subject">
-    <input type="text" id="reviewerLink" placeholder="Link (optional)">
-    <label><input type="checkbox" id="reviewerFeatured"> Featured</label>
-    <button id="addReviewerBtn">Add Reviewer</button>
-    <ul id="reviewersList"></ul>
-  </section>
-
-</div>
-
-<script type="module">
-import { db, auth } from './js/firebase.js';
-import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-import { signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-
-// Logout
-document.getElementById('logoutBtn').addEventListener('click', async () => {
-  await signOut(auth);
-  window.location.href = 'index.html';
-});
-
-/* ===== Section Motto ===== */
-const mottoInput = document.getElementById('mottoInput');
-const saveMottoBtn = document.getElementById('saveMottoBtn');
-const currentMotto = document.getElementById('currentMotto');
-
-async function loadMotto() {
-  const docRef = doc(db, 'sectionInfo', 'AAET1B');
-  const snap = await getDoc(docRef);
-  currentMotto.innerText = 'Current Motto: ' + (snap.exists() ? snap.data().motto : '...');
+/* ================= General Styles ================= */
+:root {
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-saveMottoBtn.addEventListener('click', async () => {
-  const motto = mottoInput.value;
-  if (!motto) return alert('Enter a motto!');
-  await setDoc(doc(db, 'sectionInfo', 'AAET1B'), { motto, updatedAt: new Date().toISOString() });
-  mottoInput.value = '';
-  loadMotto();
-});
-
-loadMotto();
-
-/* ===== Officers ===== */
-const officerPosition = document.getElementById('officerPosition');
-const officerName = document.getElementById('officerName');
-const addOfficerBtn = document.getElementById('addOfficerBtn');
-const officersList = document.getElementById('officersList');
-
-async function loadOfficers() {
-  officersList.innerHTML = '';
-  const snapshot = await getDocs(collection(db, 'officers'));
-  snapshot.forEach(docSnap => {
-    const li = document.createElement('li');
-    li.innerText = `${docSnap.data().position}: ${docSnap.data().name}`;
-    const delBtn = document.createElement('button'); delBtn.innerText='Delete';
-    delBtn.addEventListener('click', async () => { await deleteDoc(doc(db,'officers',docSnap.id)); loadOfficers(); });
-    li.appendChild(delBtn);
-    officersList.appendChild(li);
-  });
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-addOfficerBtn.addEventListener('click', async () => {
-  const pos = officerPosition.value;
-  const name = officerName.value;
-  if (!pos || !name) return alert('Enter both position and name!');
-  await addDoc(collection(db, 'officers'), { position: pos, name });
-  officerPosition.value=''; officerName.value='';
-  loadOfficers();
-});
-
-loadOfficers();
-
-/* ===== Pictures ===== */
-const pictureURL = document.getElementById('pictureURL');
-const pictureDesc = document.getElementById('pictureDesc');
-const addPictureBtn = document.getElementById('addPictureBtn');
-const picturesList = document.getElementById('picturesList');
-
-async function loadPictures() {
-  picturesList.innerHTML='';
-  const snapshot = await getDocs(collection(db,'pictures'));
-  snapshot.forEach(docSnap => {
-    const img = document.createElement('img');
-    img.src = docSnap.data().url;
-    img.alt = docSnap.data().description;
-    img.title = docSnap.data().description;
-    picturesList.appendChild(img);
-  });
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px;
+  overflow-x: hidden;
 }
 
-addPictureBtn.addEventListener('click', async () => {
-  const url = pictureURL.value;
-  const desc = pictureDesc.value;
-  if(!url) return alert('Enter image URL!');
-  await addDoc(collection(db,'pictures'),{ url, description: desc });
-  pictureURL.value=''; pictureDesc.value='';
-  loadPictures();
-});
-
-loadPictures();
-
-/* ===== Announcements ===== */
-const announcementTitle = document.getElementById('announcementTitle');
-const announcementContent = document.getElementById('announcementContent');
-const addAnnouncementBtn = document.getElementById('addAnnouncementBtn');
-const announcementsList = document.getElementById('announcementsList');
-
-async function loadAnnouncements() {
-  announcementsList.innerHTML='';
-  const snapshot = await getDocs(collection(db,'announcements'));
-  snapshot.forEach(docSnap => {
-    const li = document.createElement('li');
-    li.innerHTML = `<strong>${docSnap.data().title}</strong>: ${docSnap.data().content}`;
-    announcementsList.appendChild(li);
-  });
+.container, .intro-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-addAnnouncementBtn.addEventListener('click', async () => {
-  const title = announcementTitle.value;
-  const content = announcementContent.value;
-  if(!title || !content) return alert('Enter title and content!');
-  await addDoc(collection(db,'announcements'), { title, content, createdAt: new Date().toISOString() });
-  announcementTitle.value=''; announcementContent.value='';
-  loadAnnouncements();
-});
-
-loadAnnouncements();
-
-/* ===== Reviewers ===== */
-const reviewerName = document.getElementById('reviewerName');
-const reviewerSubject = document.getElementById('reviewerSubject');
-const reviewerLink = document.getElementById('reviewerLink');
-const reviewerFeatured = document.getElementById('reviewerFeatured');
-const addReviewerBtn = document.getElementById('addReviewerBtn');
-const reviewersList = document.getElementById('reviewersList');
-
-async function loadReviewers() {
-  reviewersList.innerHTML='';
-  const snapshot = await getDocs(collection(db,'reviewers'));
-  snapshot.forEach(docSnap=>{
-    const li = document.createElement('li');
-    li.innerHTML = `${docSnap.data().name} - ${docSnap.data().subject} ${docSnap.data().featured?'🌟':''} <a href="${docSnap.data().link||'#'}" target="_blank">Link</a>`;
-    reviewersList.appendChild(li);
-  });
+/* ================= Animations ================= */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
 }
 
-addReviewerBtn.addEventListener('click', async()=>{
-  const name = reviewerName.value;
-  const subject = reviewerSubject.value;
-  const link = reviewerLink.value;
-  const featured = reviewerFeatured.checked;
-  if(!name || !subject) return alert('Enter name and subject!');
-  await addDoc(collection(db,'reviewers'), { name, subject, link: link||'', featured, createdAt: new Date().toISOString() });
-  reviewerName.value=''; reviewerSubject.value=''; reviewerLink.value=''; reviewerFeatured.checked=false;
-  loadReviewers();
-});
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
 
-loadReviewers();
-</script>
-</body>
-</html>
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(102, 126, 234, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.8); }
+}
+
+/* ================= Intro Page ================= */
+.intro-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-gradient);
+  z-index: -1;
+}
+
+.particles-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.intro-container {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 50px 40px;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow);
+  max-width: 500px;
+  width: 90%;
+  animation: fadeInUp 1s ease-out;
+}
+
+.intro-container h1 {
+  font-size: 3.5rem;
+  background: linear-gradient(to right, #fff, #f3f3f3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.intro-container > p {
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 30px;
+  font-weight: 300;
+}
+
+.intro-visuals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin: 30px 0;
+}
+
+.intro-visuals img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 15px;
+  transition: var(--transition);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.intro-visuals img:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* ================= Login Form ================= */
+.login-form {
+  margin-top: 30px;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 15px 20px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 1rem;
+  transition: var(--transition);
+  border: 2px solid transparent;
+}
+
+.login-form input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.login-form input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.login-form button {
+  width: 100%;
+  padding: 15px;
+  background: var(--secondary-gradient);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: 15px;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-form button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+}
+
+.login-form button:active {
+  transform: translateY(-1px);
+}
+
+.login-form button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transform: translateX(-100%);
+}
+
+.login-form button:hover::after {
+  animation: shimmer 1.5s infinite;
+}
+
+.login-msg {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+  animation: fadeIn 0.5s ease;
+}
+
+/* ================= Header ================= */
+.header-card {
+  background: var(--primary-gradient);
+  color: white;
+  padding: 30px;
+  border-radius: 20px;
+  margin-bottom: 30px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.8s ease;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.header-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transform: rotate(45deg);
+}
+
+.header-card h1 {
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.motto {
+  font-style: italic;
+  font-size: 1.2rem;
+  opacity: 0.9;
+  position: relative;
+  z-index: 1;
+}
+
+.logoutBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 12px 25px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: var(--transition);
+  z-index: 1;
+  backdrop-filter: blur(5px);
+}
+
+.logoutBtn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px) scale(1.05);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ================= Section Cards ================= */
+.section-card {
+  background: white;
+  padding: 30px;
+  margin: 25px 0;
+  border-radius: 20px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+  animation: fadeInUp 0.8s ease;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.section-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.section-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: var(--primary-gradient);
+}
+
+.section-card h2 {
+  color: #333;
+  margin-bottom: 25px;
+  font-size: 1.8rem;
+  position: relative;
+  display: inline-block;
+}
+
+.section-card h2::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background: var(--primary-gradient);
+  border-radius: 2px;
+}
+
+/* ================= Form Elements ================= */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+  width: 100%;
+  padding: 15px 20px;
+  margin: 10px 0;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: var(--transition);
+  font-family: 'Poppins', sans-serif;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  transform: translateY(-2px);
+}
+
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* ================= Buttons ================= */
+button {
+  padding: 14px 28px;
+  background: var(--primary-gradient);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  margin: 10px 5px;
+  position: relative;
+  overflow: hidden;
+}
+
+button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+button:active {
+  transform: translateY(-1px);
+}
+
+button.secondary {
+  background: var(--secondary-gradient);
+}
+
+button.success {
+  background: var(--success-gradient);
+}
+
+button.warning {
+  background: var(--warning-gradient);
+}
+
+button.delete {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+}
+
+/* ================= Lists ================= */
+ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+ul li {
+  background: #f8f9ff;
+  margin: 10px 0;
+  padding: 20px;
+  border-radius: 12px;
+  border-left: 4px solid #667eea;
+  animation: slideInLeft 0.5s ease;
+  transition: var(--transition);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+ul li:hover {
+  background: #f0f4ff;
+  transform: translateX(5px);
+}
+
+ul li button {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+}
+
+/* ================= Carousel ================= */
+.carousel {
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+  padding: 20px 0;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+.carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-img {
+  min-width: 300px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 15px;
+  transition: var(--transition);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* ================= Reviewers ================= */
+.reviewer-card {
+  background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+  padding: 25px;
+  margin: 20px 0;
+  border-radius: 15px;
+  font-size: 1.2rem;
+  text-align: center;
+  border: 2px solid transparent;
+  transition: var(--transition);
+  animation: fadeInUp 0.5s ease;
+}
+
+.reviewer-card:hover {
+  border-color: #667eea;
+  transform: translateY(-5px);
+}
+
+.featured {
+  position: relative;
+  background: linear-gradient(135deg, #fff9c4 0%, #ffe082 100%);
+  border: 2px solid #ffd54f;
+}
+
+.featured::before {
+  content: '🌟 FEATURED';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffd54f;
+  color: #333;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+/* ================= Admin Specific ================= */
+.admin-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #555;
+  font-weight: 500;
+}
+
+.pictures-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.pictures-preview img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 10px;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.pictures-preview img:hover {
+  transform: scale(1.1) rotate(2deg);
+}
+
+/* ================= Modal ================= */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  max-width: 500px;
+  width: 90%;
+  animation: fadeInUp 0.4s ease;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 5px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  color: #333;
+  background: #f5f5f5;
+  border-radius: 50%;
+}
+
+/* ================= Toast Notifications ================= */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  padding: 15px 25px;
+  background: #333;
+  color: white;
+  border-radius: 10px;
+  z-index: 1000;
+  animation: slideInRight 0.3s ease, fadeInUp 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toast.success {
+  background: #4caf50;
+}
+
+.toast.error {
+  background: #f44336;
+}
+
+.toast.info {
+  background: #2196f3;
+}
+
+/* ================= Responsive ================= */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+  
+  .section-card {
+    padding: 20px;
+  }
+  
+  .header-card h1 {
+    font-size: 1.8rem;
+  }
+  
+  .carousel-img {
+    min-width: 250px;
+  }
+  
+  .admin-controls {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .intro-container {
+    padding: 30px 20px;
+  }
+  
+  .intro-container h1 {
+    font-size: 2.5rem;
+  }
+  
+  .logoutBtn {
+    position: relative;
+    top: 0;
+    right: 0;
+    margin-top: 15px;
+    width: 100%;
+  }
+}
